@@ -1,5 +1,5 @@
 <?php
-session_start();
+/*session_start();
 include('db_config.php');
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -24,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         exit();
     } else {
-        echo "Invalid credentials!";
+        echo "<p style='color: red;'>Invalid credentials!</p>";
     }
 }
 ?>
@@ -35,47 +35,102 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            padding: 20px;
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #4b79a1, #283e51); /* Dark blue gradient background */
+           /* display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: #fff;
         }
-        form {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            max-width: 300px;
-            margin: 0 auto;
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.2); /* Transparent white */
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px); /* Blurred background effect */
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            color: #fff;
         }
+
+        .login-container h2 {
+            font-size: 28px;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
         input[type="text"], input[type="password"] {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
+            padding: 12px;
+            margin: 15px 0;
             border: 1px solid #ddd;
-            border-radius: 5px;
+            border-radius: 8px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.7);
+            color: #333;
         }
+
+        input[type="text"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: #004080; /* Dark blue border on focus */
+        }
+
         button {
             width: 100%;
-            padding: 10px;
-            background-color: #5cb85c;
-            border: none;
+            padding: 12px;
+            background-color: #004080; /* Dark blue button */
             color: white;
-            border-radius: 5px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
+
         button:hover {
-            background-color: #4cae4c;
+            background-color: #003366; /* Darker blue on hover */
+        }
+
+        .forgot-password {
+            color: #004080; /* Dark blue link */
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: red;
+            font-size: 16px;
+            margin-top: 10px;
         }
     </style>
-</head>
-<body>
-    <h2>Login</h2>
-    <form method="post">
-        Username: <input type="text" name="username" required><br>
-        Password: <input type="password" name="password" required><br>
-        <button type="submit">Login</button>
-    </form>
+</head>*/
+/*<body>
+
+    <div class="login-container">
+        <h2>Login</h2>
+        <form method="post">
+            <input type="text" name="username" placeholder="Enter your username" required><br>
+            <input type="password" name="password" placeholder="Enter your password" required><br>
+            <button type="submit">Login</button>
+        </form>
+        <a href="#" class="forgot-password">Forgot password?</a>
+        <?php if (isset($errorMessage)) { ?>
+            <div class="error-message"><?php echo $errorMessage; ?></div>
+        <?php } ?>
+    </div>
+
 </body>
-</html>
+</html>*/

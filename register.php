@@ -9,12 +9,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     try {
         $stmt = $pdo->prepare("INSERT INTO users (username, password, user_type_id) VALUES (?, ?, ?)");
         $stmt->execute([$username, $password, $user_type]);
-        echo "<script>alert('Registration successful! You can now login.'); window.location.href='login.php';</script>";
+        
+        // Redirect based on user type
+        if ($user_type == 1) {
+            echo "<script>alert('Registration successful! You can now login as Nursery Admin.'); window.location.href='nursery_admin_login.php';</script>";
+        } elseif ($user_type == 2) {
+            echo "<script>alert('Registration successful! You can now login as School Admin.'); window.location.href='school_admin_login.php';</script>";
+        }
     } catch (PDOException $e) {
         echo "<script>alert('Error: " . $e->getMessage() . "');</script>";
     }
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -25,7 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            background-color: #1e3c72; /* Blue background */
+            color: #fff; /* White text */
             margin: 0;
             padding: 0;
             display: flex;
@@ -36,8 +42,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         .container {
             display: flex;
-            width: 900px;
-            background-color: #fff;
+            width: 600px;
+            background-color: rgba(255, 255, 255, 0.8); /* Transparent white background */
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
             border-radius: 10px;
             overflow: hidden;
@@ -45,8 +51,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         .image-section {
             flex: 1;
-            background: url('image.png') no-repeat center center/cover;
+            background: url('images/register.jpg') no-repeat center center;
+            background-size: contain; /* Ensures the full image is displayed */
             position: relative;
+            opacity: 0.7; /* Slight transparency to image */
         }
 
         .form-section {
@@ -57,6 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .form-section h2 {
             text-align: center;
             margin-bottom: 20px;
+            font-size: 24px;
         }
 
         .form-section form {
@@ -75,29 +84,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         .form-section form button {
-            background: linear-gradient(to right, #5cb85c, #4cae4c);
+            background: linear-gradient(to right,rgb(92, 155, 184),rgb(62, 128, 182));
             color: #fff;
             cursor: pointer;
             border: none;
         }
 
         .form-section form button:hover {
-            background: linear-gradient(to right, #4cae4c, #5cb85c);
+            background: linear-gradient(to right,rgb(76, 143, 174),rgb(82, 160, 190));
         }
 
-        .form-section .login-link {
-            text-align: center;
-            margin-top: 10px;
-        }
-
-        .form-section .login-link a {
-            color: #007bff;
-            text-decoration: none;
-        }
-
-        .form-section .login-link a:hover {
-            text-decoration: underline;
-        }
     </style>
 </head>
 <body>
@@ -111,13 +107,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <select name="user_type" required>
                     <option value="1">Nursery Admin</option>
                     <option value="2">School Admin</option>
-                    <option value="3">Parent</option>
                 </select>
                 <button type="submit">Register</button>
             </form>
-            <div class="login-link">
-                <p>Already have an account? <a href="login.php">Log in</a></p>
-            </div>
         </div>
     </div>
 </body>

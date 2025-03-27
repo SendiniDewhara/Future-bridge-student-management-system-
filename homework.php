@@ -13,12 +13,15 @@ try {
     exit;
 }
 
+$successMessage = ""; // Variable to hold the success message
+
 // Handle form submission for adding homework
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $batch_id = $_POST['batch_id'];
-    $homework_title = $_POST['homework_title'];
-    $description = $_POST['description'];
-    $due_date = $_POST['due_date'];
+    $student_id = $_POST['student_id'];  // Student ID
+    $subject = $_POST['subject'];  // Subject
+    $assignment_description = $_POST['description']; // Assignment Description
+    $due_date = $_POST['due_date'];  // Due Date
 
     // File upload handling
     $uploads_dir = 'uploads/'; // Directory where files will be uploaded
@@ -41,19 +44,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Convert the array of uploaded files into a comma-separated string
     $file_paths = implode(',', $uploaded_files);
 
+    // Set default values for the homework submission
+    $status = 'pending';  // Default status for newly added homework
+    $submission_date = null;  // Submission date is initially null
+
     try {
         // Insert the homework into the database
-        $query = "INSERT INTO homework (homework_title, description, due_date, batch_id, file_paths) 
-                  VALUES (:homework_title, :description, :due_date, :batch_id, :file_paths)";
+        $query = "INSERT INTO homework (student_id, subject, assignment_description, due_date, batch_id, file_paths, status, submission_date) 
+                  VALUES (:student_id, :subject, :assignment_description, :due_date, :batch_id, :file_paths, :status, :submission_date)";
         $stmt = $pdo->prepare($query);
-        $stmt->bindParam(':homework_title', $homework_title);
-        $stmt->bindParam(':description', $description);
+        $stmt->bindParam(':student_id', $student_id);
+        $stmt->bindParam(':subject', $subject);
+        $stmt->bindParam(':assignment_description', $assignment_description);
         $stmt->bindParam(':due_date', $due_date);
         $stmt->bindParam(':batch_id', $batch_id);
         $stmt->bindParam(':file_paths', $file_paths);
+        $stmt->bindParam(':status', $status);
+        $stmt->bindParam(':submission_date', $submission_date);
 
         if ($stmt->execute()) {
-            echo "<p>Homework added successfully!</p>";
+            $successMessage = "Homework uploaded successfully!";
         } else {
             echo "<p>Error: Could not add homework.</p>";
         }
@@ -73,28 +83,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
+            background: #4b79a1; /* Blue background */
+            background: linear-gradient(to right, #4b79a1, #283e51); /* Dark blue gradient background */
             margin: 0;
             padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
         }
 
         .container {
             width: 50%;
-            margin: 50px auto;
             padding: 20px;
-            background-color: white;
+            background-color: rgba(255, 255, 255, 0.7); /* Transparent white box */
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
+            backdrop-filter: blur(10px); /* Blur effect for the background */
         }
 
         h2 {
             text-align: center;
-            color: #333;
+            color: white; /* White text */
         }
 
         label {
             display: block;
             margin-top: 10px;
+            color: #4b79a1; /* Blue text */
             font-weight: bold;
         }
 
@@ -130,9 +147,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .file-input input {
             padding: 5px;
         }
+
+        small {
+            color: #4b79a1;
+            font-size: 12px;
+        }
+
+        /* Centered success message */
+        .success-box {
+            display: <?php echo $successMessage ? 'flex' : 'none'; ?>;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.5); /* Semi-transparent white */
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            font-size: 18px;
+            color: #0044cc; /* Blue text */
+            font-weight: bold;
+            width: 40%;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
     </style>
 </head>
 <body>
+
+    <?php if (!empty($successMessage)): ?>
+        <div class="success-box">
+            <?php echo $successMessage; ?>
+        </div>
+    <?php endif; ?>
+
     <div class="container">
         <h2>Add Homework</h2>
         <form method="POST" action="homework.php" enctype="multipart/form-data">
@@ -144,10 +193,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <?php endforeach; ?>
             </select>
 
-            <label for="homework_title">Homework Title:</label>
-            <input type="text" name="homework_title" required>
+            <label for="student_id">Student ID:</label>
+            <input type="text" name="student_id" required>
 
-            <label for="description">Description:</label>
+            <label for="subject">Subject:</label>
+            <input type="text" name="subject" required>
+
+            <label for="description">Assignment Description:</label>
             <textarea name="description" required></textarea>
 
             <label for="due_date">Due Date:</label>
@@ -162,5 +214,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <button type="submit">Add Homework</button>
         </form>
     </div>
+
 </body>
 </html>

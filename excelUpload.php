@@ -34,10 +34,104 @@ if (isset($_POST['Submit'])) {
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Upload Excel File - View Data</title>
-    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Marks Excel Sheet</title>
+    <!-- Bootstrap 4 CSS for responsive layout -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #003366; /* Dark Blue Background */
+            color: white; /* White font color */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding-top: 90px; /* Padding added to the top of the page */
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.15); /* Slightly transparent white */
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 900px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-control {
+            border-radius: 5px;
+            padding: 15px;
+            font-size: 1.1em;
+            background-color: rgba(255, 255, 255, 0.9); /* Light background for inputs */
+            border: 1px solid #ddd;
+            color: #003366; /* Dark blue text color */
+        }
+
+        .btn-success {
+            background-color: transparent;
+            border: 2px solid #00B8D4;
+            color: #00B8D4;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            width: 100%;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            background-color: #00B8D4;
+            color: white;
+        }
+
+        table {
+            width: 100%;
+            margin-top: 30px;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        th {
+            background-color: #003366;
+            color: white;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tbody tr:nth-child(odd) {
+            background-color: #ffffff;
+        }
+
+        tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
 </head>
 <body>
 
@@ -47,7 +141,7 @@ if (isset($_POST['Submit'])) {
     <!-- Upload Form -->
     <form method="POST" enctype="multipart/form-data">
         <div class="form-group">
-            <label>Upload Excel File</label>
+            <label for="file">Upload Excel File</label>
             <input type="file" name="file" class="form-control" required>
         </div>
         <div class="form-group">
@@ -57,7 +151,7 @@ if (isset($_POST['Submit'])) {
 
     <!-- Display Data -->
     <?php if (isset($rows) && !empty($rows)): ?>
-        <h2>Uploaded Excel Data</h2>
+        <h2 class="mt-5 text-center">Uploaded Excel Data</h2>
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -84,6 +178,11 @@ if (isset($_POST['Submit'])) {
         </table>
     <?php endif; ?>
 </div>
+
+<!-- Bootstrap JS and jQuery (for potential form handling or UI enhancements) -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
 </body>
 </html>

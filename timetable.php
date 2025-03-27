@@ -1,83 +1,53 @@
 <?php
-require 'vendor/autoload.php';  // Include Composer's autoload file
-use PhpOffice\PhpSpreadsheet\IOFactory;
+session_start();
+require 'vendor/autoload.php'; // Include Composer's autoload file
 
-$host = 'localhost';  // MySQL server host (typically localhost for local servers like XAMPP)
-$username = 'root';   // MySQL username (default for XAMPP)
-$password = '';       // MySQL password (default is empty for XAMPP)
-$db_name = 'student_management_system';  // The name of your database
+$host = 'localhost'; // MySQL server host
+$username = 'root'; // MySQL username
+$password = ''; // MySQL password
+$db_name = 'student_management_system'; // The name of  database
 
 try {
-    // Create a PDO instance with the provided connection details
     $pdo = new PDO("mysql:host=$host;dbname=$db_name", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
-    // If the connection fails, show the error message and stop script execution
     echo "Connection failed: " . $e->getMessage();
-    exit;  // Stop further execution if the connection is not established
+    exit;
 }
 
-// Handle file upload
 if (isset($_POST['submit'])) {
-    // Check if a file is uploaded
-    if ($_FILES['file']['error'] == 0) {
-        // Get the file and batch information
-        $file = $_FILES['file']['tmp_name'];
-        $batch = $_POST['batch'];  // Batch selection from the dropdown
-        $fileName = $_FILES['file']['name'];
-        $fileExtension = pathinfo($fileName, PATHINFO_EXTENSION);
+    $day_of_week = $_POST['day_of_week'];
+    $start_time = $_POST['start_time'];
+    $end_time = $_POST['end_time'];
+    $subject = $_POST['subject'];
+    $batch_id = $_POST['batch'];
 
-        // Check if the file is an Excel file
-        if ($fileExtension == 'xlsx' || $fileExtension == 'xls') {
-            // Handle Excel file
-            try {
-                $spreadsheet = IOFactory::load($file);
-                $sheet = $spreadsheet->getActiveSheet();
-                $rows = [];
+    try {
+        $stmt = $pdo->prepare("INSERT INTO timetable (day_of_week, start_time, end_time, subject, batch_id) 
+                               VALUES (?, ?, ?, ?, ?)");
+        $stmt->execute([$day_of_week, $start_time, $end_time, $subject, $batch_id]);
 
-                foreach ($sheet->getRowIterator() as $row) {
-                    $cellIterator = $row->getCellIterator();
-                    $cellIterator->setIterateOnlyExistingCells(false);
-                    $cells = [];
-                    foreach ($cellIterator as $cell) {
-                        $cells[] = $cell->getFormattedValue();
-                    }
-                    $rows[] = $cells;
-                }
-
-                // Store timetable data in the database
-                foreach ($rows as $row) {
-                    $student_id = $row[0];
-
-                    // Check if student_id exists in the students table
-                    $stmt = $pdo->prepare("SELECT COUNT(*) FROM students WHERE student_id = ?");
-                    $stmt->execute([$student_id]);
-                    $studentExists = $stmt->fetchColumn();
-
-                    if ($studentExists) {
-                        // If student_id exists, insert the timetable data including the batch
-                        $stmt = $pdo->prepare("INSERT INTO timetable (student_id, day_of_week, start_time, end_time, subject, batch) 
-                                              VALUES (?, ?, ?, ?, ?, ?)");
-                        $stmt->execute([$row[0], $row[1], $row[2], $row[3], $row[4], $batch]);
-                    } else {
-                        echo "Student ID " . htmlspecialchars($student_id) . " does not exist. Skipping this entry.<br>";
-                    }
-                }
-
-                echo "Timetable uploaded and data saved successfully!";
-            } catch (Exception $e) {
-                echo "Error reading Excel file: " . $e->getMessage();
-            }
-        } else {
-            echo "Invalid file type. Only Excel files are allowed.";
+        // Insert a notification for the parent
+        if (isset($_SESSION['user_id'])) {
+            $parent_id = $_SESSION['user_id'];
+            $notification_message = "New timetable added: $subject on $day_of_week at $start_time.";
+            $stmt_notification = $pdo->prepare("INSERT INTO notifications (user_id, message, created_at, is_read) 
+                                               VALUES (?, ?, NOW(), 0)");
+            $stmt_notification->execute([$parent_id, $notification_message]);
         }
-    } else {
-        echo "Error uploading file.";
+
+        echo "Timetable uploaded successfully and notification sent!";
+    } catch (Exception $e) {
+        echo "Error: " . $e->getMessage();
     }
 }
 
-// Fetch timetable data
-$timetableQuery = $pdo->query("SELECT timetable_id, student_id, day_of_week, start_time, end_time, subject, batch FROM timetable");
+$batchQuery = $pdo->query("SELECT batch_id, batch_name FROM batches");
+$batches = $batchQuery->fetchAll(PDO::FETCH_ASSOC);
+
+$timetableQuery = $pdo->query("SELECT t.timetable_id, t.day_of_week, t.start_time, t.end_time, t.subject, b.batch_name 
+                               FROM timetable t
+                               JOIN batches b ON t.batch_id = b.batch_id");
 $timetableData = $timetableQuery->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
@@ -87,38 +57,117 @@ $timetableData = $timetableQuery->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Timetable</title>
-    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color:rgb(59, 104, 151); /* Blue background */
+            color: white; /* White text */
+            font-family: Arial, sans-serif;
+            padding-top: 50px;
+        }
+
+        h1, h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-group label {
+            font-size: 16px;
+        }
+
+        .form-control {
+            background-color: transparent; /* Transparent background */
+            color: white; /* White text */
+            border: 1px solid white; /* White border */
+            border-radius: 4px;
+            box-shadow: none;
+            margin-bottom: 15px;
+        }
+
+        .form-control:focus {
+            border-color:rgb(80, 119, 161); /* Focused border color */
+            box-shadow: 0 0 8px rgba(0, 123, 255, 0.5); /* Focused box shadow */
+        }
+
+        .btn-primary {
+            background-color: #0056b3; /* Dark blue button */
+            border-color: #0056b3;
+        }
+
+        .btn-primary:hover {
+            background-color:rgb(100, 139, 177); /* Darker blue button on hover */
+            border-color:rgb(84, 125, 167);
+        }
+
+        .table {
+            background-color: rgba(255, 255, 255, 0.3); /* Transparent white background */
+            color: #333333; /* Dark text for the table */
+        }
+
+        .table-bordered {
+            border: 1px solid rgba(73, 132, 196, 0.8); /* Semi-transparent blue border */
+        }
+
+        .table th, .table td {
+            color: #333; /* Dark text for table cells */
+        }
+
+        .table th {
+            background-color:rgb(72, 120, 170); /* Blue header */
+            color: white;
+        }
+
+        .btn {
+            margin: 5px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: rgba(0, 0, 0, 0.4); /* Slight black overlay for better readability */
+            padding: 30px;
+            border-radius: 8px;
+        }
+    </style>
 </head>
 <body>
 <div class="container">
     <h1>Upload Timetable</h1>
-
-    <!-- Upload Timetable Form -->
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST">
         <div class="form-group">
-            <label for="file">Upload Timetable (Excel file)</label>
-            <input type="file" name="file" class="form-control" required>
+            <label for="day_of_week">Day of the Week</label>
+            <input type="text" name="day_of_week" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="start_time">Start Time</label>
+            <input type="time" name="start_time" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="end_time">End Time</label>
+            <input type="time" name="end_time" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="subject">Subject</label>
+            <input type="text" name="subject" class="form-control" required>
         </div>
         <div class="form-group">
             <label for="batch">Select Batch</label>
             <select name="batch" class="form-control" required>
                 <option value="">Select Batch</option>
-                <option value="Batch A">Batch A</option>
-                <option value="Batch B">Batch B</option>
-                <option value="Batch C">Batch C</option>
-                <!-- Add more batches as needed -->
+                <?php foreach ($batches as $batch): ?>
+                    <option value="<?php echo $batch['batch_id']; ?>">
+                        <?php echo htmlspecialchars($batch['batch_name']); ?>
+                    </option>
+                <?php endforeach; ?>
             </select>
         </div>
         <button type="submit" name="submit" class="btn btn-primary">Upload</button>
     </form>
 
     <h2>Existing Timetable Entries</h2>
-
-    <!-- Timetable Table -->
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>Student ID</th>
                 <th>Day of Week</th>
                 <th>Start Time</th>
                 <th>End Time</th>
@@ -130,14 +179,12 @@ $timetableData = $timetableQuery->fetchAll(PDO::FETCH_ASSOC);
         <tbody>
             <?php foreach ($timetableData as $entry): ?>
                 <tr>
-                    <td><?php echo htmlspecialchars($entry['student_id']); ?></td>
                     <td><?php echo htmlspecialchars($entry['day_of_week']); ?></td>
                     <td><?php echo htmlspecialchars($entry['start_time']); ?></td>
                     <td><?php echo htmlspecialchars($entry['end_time']); ?></td>
                     <td><?php echo htmlspecialchars($entry['subject']); ?></td>
-                    <td><?php echo htmlspecialchars($entry['batch']); ?></td>
+                    <td><?php echo htmlspecialchars($entry['batch_name']); ?></td>
                     <td>
-                        <!-- Edit and Delete Actions -->
                         <a href="editTimetable.php?timetable_id=<?php echo $entry['timetable_id']; ?>" class="btn btn-warning">Edit</a>
                         <a href="deleteTimetable.php?timetable_id=<?php echo $entry['timetable_id']; ?>" class="btn btn-danger">Delete</a>
                     </td>
