@@ -70,4 +70,4 @@ Future Enhancements 🚀
 ### **1. Clone the Repository**  
 Open your terminal or command prompt and run:  
 ```sh
-git clone https://github.com/YOUR_USERNAME/Future-Bridge.git
+git clone https://github.com/SendiniDewhara/Future-Bridge.git
